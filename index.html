@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Protótipo de reservas de salas de estudo, desenvolvido para o Sprint 1.">
+    <title>ReservaStudy — salas de estudo</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="src/booking-domain.js" defer></script>
+    <script src="src/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="ReservaStudy, início">
+        <span>ReservaStudy</span>
+      </a>
+    </header>
+
+    <main class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div class="intro-copy">
+          <h1 id="page-title">Reservar sala de estudo</h1>
+          <p class="intro-text">Escolhe uma sala e indica o horário que pretendes reservar.</p>
+        </div>
+      </section>
+
+      <section class="booking-layout" aria-label="Reservar uma sala">
+        <div class="booking-main">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">PASSO 1</p>
+              <h2>Escolhe uma sala</h2>
+            </div>
+            <p class="muted">Escolhe uma opção</p>
+          </div>
+          <div id="room-list" class="room-list" role="group" aria-label="Salas de estudo"></div>
+
+          <form id="booking-form" class="booking-form" novalidate>
+            <div class="section-heading form-heading">
+              <div>
+                <p class="eyebrow">PASSO 2</p>
+                <h2>Define o teu horário</h2>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label class="field field-wide">
+                <span>O teu nome</span>
+                <input id="student-name" name="name" autocomplete="name" maxlength="80" placeholder="Ex.: Ana Silva" required>
+              </label>
+              <label class="field">
+                <span>Data</span>
+                <input id="booking-date" name="date" type="date" required>
+              </label>
+              <div class="time-fields">
+                <label class="field">
+                  <span>Início</span>
+                  <input id="start-time" name="start" type="time" value="14:00" required>
+                </label>
+                <label class="field">
+                  <span>Fim</span>
+                  <input id="end-time" name="end" type="time" value="15:00" required>
+                </label>
+              </div>
+            </div>
+            <p id="form-message" class="form-message" aria-live="polite"></p>
+            <button class="button button-primary" type="submit">
+              Reservar sala <span aria-hidden="true">→</span>
+            </button>
+            <p class="form-footnote">Horário de funcionamento: 08:00–21:00 · Reservas guardadas neste dispositivo.</p>
+          </form>
+        </div>
+
+        <aside class="schedule-panel" aria-labelledby="schedule-title">
+          <div class="schedule-header">
+            <div>
+              <p class="eyebrow">O TEU DIA</p>
+              <h2 id="schedule-title">Reservas</h2>
+            </div>
+            <span id="reservation-count" class="count-badge">0</span>
+          </div>
+          <label class="field schedule-date">
+            <span>Ver outro dia</span>
+            <input id="schedule-date" type="date" aria-label="Ver reservas de outra data">
+          </label>
+          <div id="reservation-list" class="reservation-list" aria-live="polite"></div>
+          <p class="demo-note">Dados de exemplo para demonstração.</p>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

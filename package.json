@@ -1,0 +1,12 @@
+{
+  "name": "reservastudy-sprint-1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Protótipo académico de reservas de salas de estudo — Sprint 1",
+  "scripts": {
+    "test": "node --test tests/booking-domain.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

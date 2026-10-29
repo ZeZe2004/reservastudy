@@ -1,0 +1,8 @@
+Issue Type,Summary,Description,Priority,Labels,Sprint
+Story,Consultar salas de estudo,"Como estudante, quero consultar salas, capacidade e equipamento para escolher um espaço adequado.",High,sprint-1,Sprint 1
+Story,Reservar uma sala disponível,"Como estudante, quero reservar uma sala num intervalo livre para garantir um espaço de estudo.",High,sprint-1,Sprint 1
+Task,Definir âmbito e critérios de aceitação,"Documentar problema, objetivo, história principal, critérios de aceitação e limites do protótipo.",High,sprint-1,Sprint 1
+Task,Implementar interface de reserva,"Criar interface responsiva com escolha de sala, data, horas, confirmação, lista e cancelamento.",High,sprint-1,Sprint 1
+Task,Validar conflitos de horário,"Impedir intervalos inválidos, datas passadas, horários fora de funcionamento e reservas sobrepostas; adicionar testes.",High,sprint-1,Sprint 1
+Task,Configurar CI inicial,"Executar a suite de testes Node.js em push e pull request com GitHub Actions.",Medium,sprint-1,Sprint 1
+Task,Preparar revisão e documentação,"Documentar decisões, limitações e próximos passos; registar no Jira apenas cerimónias e feedback reais.",Medium,sprint-1,Sprint 1
