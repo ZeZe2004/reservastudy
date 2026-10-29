@@ -97,6 +97,13 @@ A separação entre `booking-domain.js` e `app.js` foi pensada para que a lógic
 - **Apresentado:** problema, história principal e critérios de aceitação; protótipo ReservaStudy (escolha de sala, reserva válida, recusa de horário sobreposto, cancelamento); 7/7 testes de domínio; CI a passar no GitHub; decisões de arquitetura e alternativas; contrato de equipa e rotação de PO.
 - **Impedimentos:** nenhum.
 
+### Registo da retrospetiva do Sprint 1
+
+- **Data:** 29/10/2026 · **Participantes:** Rafael Vicente (PO) e José Baptista
+- **Correu bem:** boa colaboração; divisão de trabalho e revisão conjunta funcionaram.
+- **A melhorar:** o código só foi para o GitHub tarde, por isso o CI só correu remotamente depois do prazo do sprint.
+- **Ação:** push diário para o GitHub com CI a passar — responsável Rafael Vicente, durante o Sprint 2.
+
 ## Riscos e limitações
 
 1. Reservas locais não são partilhadas entre estudantes; não simular disponibilidade real.
