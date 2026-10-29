@@ -2,7 +2,7 @@
 
 **Unidade curricular:** Plataformas e Serviços X-Ops, 2026/27  
 **Equipa:** José Baptista e Rafael Vicente  
-**Product Owner deste sprint:** José Baptista  
+**Product Owner deste sprint:** Rafael Vicente  
 **Objetivo do sprint:** validar uma primeira experiência de consulta e reserva de salas e deixar uma base executável e testável para evoluir o produto nos próximos sprints.
 
 **Referência:** [página oficial da unidade](https://www.di.ubi.pt/~ngpombo/units/psx.html) e enunciado do projeto fornecido pela equipa.
@@ -46,15 +46,15 @@ O ficheiro [`sprint-1-backlog.csv`](./sprint-1-backlog.csv) resume os itens para
 
 | Prioridade | Item | Critério de conclusão | Responsabilidade proposta |
 |---|---|---|---|
-| Alta | Definir problema, objetivo e história principal | Âmbito e critérios de aceitação documentados | José Baptista (PO), com validação de ambos |
+| Alta | Definir problema, objetivo e história principal | Âmbito e critérios de aceitação documentados | Rafael Vicente (PO), com validação de ambos |
 | Alta | Criar protótipo navegável | Quatro salas e fluxo de reserva apresentados | Rafael Vicente (implementação), revisão conjunta |
 | Alta | Implementar regras de reserva | Validação e prevenção de sobreposições cobertas por testes | Rafael Vicente (implementação), José Baptista (aceitação) |
 | Média | Criar CI inicial | GitHub Actions executa `npm test` em push e pull request | Rafael Vicente (configuração), revisão conjunta |
-| Média | Preparar revisão e evidências | Roteiro, contrato e registos reais prontos para atualizar | José Baptista (PO), contribuição de ambos |
+| Média | Preparar revisão e evidências | Roteiro, contrato e registos reais prontos para atualizar | Rafael Vicente (PO), contribuição de ambos |
 
 ## Incremento demonstrável
 
-O protótipo abre em `index.html`; o fluxo de reserva e cancelamento funciona no navegador. `npm test` executa os testes da lógica de domínio. O workflow `.github/workflows/ci.yml` está preparado, mas a execução remota depende de o projeto ser colocado num repositório GitHub. O primeiro acesso cria três reservas de exemplo fictícias.
+O protótipo abre em `index.html`; o fluxo de reserva e cancelamento funciona no navegador. `npm test` executa os testes da lógica de domínio. O código está em [github.com/ZeZe2004/reservastudy](https://github.com/ZeZe2004/reservastudy) e o workflow `.github/workflows/ci.yml` corre `npm test` em cada push, com sucesso. O primeiro acesso cria três reservas de exemplo fictícias.
 
 A apresentação da revisão está em [`apresentacao-sprint-1.pptx`](./apresentacao-sprint-1.pptx).
 
@@ -78,7 +78,7 @@ A separação entre `booking-domain.js` e `app.js` foi pensada para que a lógic
 
 ## Scrum, papéis e evidências
 
-- **Product Owner:** José Baptista no Sprint 1. A rotação proposta para o planeamento seguinte é Rafael Vicente no Sprint 2; confirmar os papéis futuros em cada Sprint Planning.
+- **Product Owner:** Rafael Vicente no Sprint 1. A rotação é alternada: José Baptista no Sprint 2, Rafael no Sprint 3, José no Sprint 4 e Rafael no Sprint 5; confirmar em cada Sprint Planning.
 - **Responsabilidade de implementação:** ambos contribuem e revêm; a repartição da tabela é uma proposta e deve ser ajustada ao trabalho efetivamente realizado.
 - **Cerimónias:** registar no Jira (ou ferramenta equivalente) planeamento, check-ins diários, revisão e retrospetiva com data, participantes, decisões e links para o incremento.
 - **Evidência a completar pela equipa:** datas e presenças reais; o que foi efetivamente concluído durante o sprint; demonstração/feedback realmente recebido; impedimentos e ações acordadas. Não preencher por suposição.
@@ -89,6 +89,13 @@ A separação entre `booking-domain.js` e `app.js` foi pensada para que a lógic
 **Confirmado como concluído no pacote:** protótipo, regras cobertas por testes e workflow de CI configurado localmente. A equipa deve confirmar cada ponto e o estado do workflow remoto antes de o declarar aceite.  
 **Feedback do docente/equipa:** preencher apenas após a revisão real.  
 **Retrospetiva:** registar uma prática a manter, uma a melhorar, um impedimento observado e uma ação com responsável e prazo. Não há observações de cerimónias inventadas neste documento.
+
+### Registo da revisão do Sprint 1
+
+- **Data:** 29/10/2026
+- **Participantes:** Rafael Vicente (PO) e José Baptista
+- **Apresentado:** problema, história principal e critérios de aceitação; protótipo ReservaStudy (escolha de sala, reserva válida, recusa de horário sobreposto, cancelamento); 7/7 testes de domínio; CI a passar no GitHub; decisões de arquitetura e alternativas; contrato de equipa e rotação de PO.
+- **Impedimentos:** nenhum.
 
 ## Riscos e limitações
 

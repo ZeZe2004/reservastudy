@@ -9,8 +9,8 @@ Construir por incrementos uma aplicação útil para reservar salas de estudo, m
 
 ## Papéis e responsabilidades
 
-- O Product Owner de cada sprint mantém a visão, ordena o backlog, clarifica critérios de aceitação e confirma o valor do incremento. **Sprint 1: José Baptista.**
-- A rotação futura proposta é: Sprint 2 — Rafael Vicente; Sprint 3 — José Baptista; Sprint 4 — Rafael Vicente; Sprint 5 — José Baptista. Confirmar cada atribuição no planeamento do sprint.
+- O Product Owner de cada sprint mantém a visão, ordena o backlog, clarifica critérios de aceitação e confirma o valor do incremento. **Sprint 1: Rafael Vicente.**
+- A rotação é alternada, começando pelo Rafael: Sprint 2 — José Baptista; Sprint 3 — Rafael Vicente; Sprint 4 — José Baptista; Sprint 5 — Rafael Vicente. Confirmar cada atribuição no planeamento do sprint.
 - Ambos participam na implementação, revisão de código, testes, cerimónias, apresentações e decisões técnicas. A atribuição de uma tarefa não elimina a responsabilidade partilhada pela sua qualidade.
 - O responsável por cada issue e prazo são definidos no Jira durante o planeamento; não se presume autoria a partir do papel.
 
