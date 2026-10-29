@@ -39,5 +39,5 @@ Construir por incrementos uma aplicação útil para reservar salas de estudo, m
 Rever o contrato no Sprint Planning ou retrospetiva quando a forma de trabalho mudar. Registar no Jira a data e as alterações acordadas.
 
 **Confirmação da equipa:**  
-José Baptista: ____________________  Data: __________  
-Rafael Vicente: ___________________  Data: __________
+José Baptista: José Baptista  Data: 15/10/2026  
+Rafael Vicente: Rafael Vicente  Data: 15/10/2026
