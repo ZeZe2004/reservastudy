@@ -29,15 +29,28 @@ async function perguntar(prompt) {
       ...config.parametros
     })
   });
-  if (!resposta.ok) {
-    throw new Error(`GitHub Models respondeu ${resposta.status}: ${await resposta.text()}`);
+  const corpo = await resposta.text();
+  const tipo = resposta.headers.get("content-type") || "?";
+  if (!resposta.ok || !tipo.includes("json")) {
+    throw new Error(`GitHub Models respondeu ${resposta.status} (${tipo}): ${corpo.slice(0, 300)}`);
   }
-  const dados = await resposta.json();
+  const dados = JSON.parse(corpo);
+  const conteudo = dados.choices[0].message.content;
   return {
-    json: JSON.parse(dados.choices[0].message.content),
+    json: extrairJson(conteudo),
     modeloUsado: dados.model,
     fingerprint: dados.system_fingerprint || null
   };
+}
+
+// O modelo às vezes embrulha o JSON em texto ou em ```json; fica só com o objeto.
+function extrairJson(texto) {
+  const inicio = texto.indexOf("{");
+  const fim = texto.lastIndexOf("}");
+  if (inicio === -1 || fim <= inicio) {
+    throw new Error(`O modelo não devolveu JSON: ${texto.slice(0, 300)}`);
+  }
+  return JSON.parse(texto.slice(inicio, fim + 1));
 }
 
 module.exports = { config, montarPrompt, perguntar, root };
