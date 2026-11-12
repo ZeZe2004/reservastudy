@@ -17,17 +17,23 @@ function montarPrompt(ficheiroPrompt, entradas) {
 
 const esperar = (segundos) => new Promise((resolve) => setTimeout(resolve, segundos * 1000));
 
+// Um pedido com tempo limite. Falhas de rede e timeouts contam como estado 0, para serem repetidos.
 async function pedido(modelo, prompt, token) {
-  const resposta = await fetch(config.endpoint, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: modelo,
-      messages: [{ role: "user", content: prompt }],
-      ...config.parametros
-    })
-  });
-  return { estado: resposta.status, tipo: resposta.headers.get("content-type") || "?", corpo: await resposta.text() };
+  try {
+    const resposta = await fetch(config.endpoint, {
+      method: "POST",
+      signal: AbortSignal.timeout(config.tentativas.timeout_segundos * 1000),
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: modelo,
+        messages: [{ role: "user", content: prompt }],
+        ...config.parametros
+      })
+    });
+    return { estado: resposta.status, tipo: resposta.headers.get("content-type") || "?", corpo: await resposta.text() };
+  } catch (erro) {
+    return { estado: 0, tipo: "erro de rede", corpo: erro.name === "TimeoutError" ? "sem resposta dentro do tempo limite" : erro.message };
+  }
 }
 
 // Tenta o modelo principal com esperas crescentes; se continuar indisponível,
@@ -55,7 +61,7 @@ async function perguntar(prompt) {
         };
       }
       ultimoErro = `${modelo} respondeu ${estado} (${tipo}): ${corpo.slice(0, 300)}`;
-      if (!repetir.includes(estado) || tentativa === maximo) {
+      if (!(repetir.includes(estado) || estado === 0) || tentativa === maximo) {
         break;
       }
       const espera = esperas[Math.min(tentativa - 1, esperas.length - 1)];
