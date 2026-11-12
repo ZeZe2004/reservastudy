@@ -1,0 +1,27 @@
+{
+  "versao": "1.0.0",
+  "ferramenta": "GitHub Models",
+  "endpoint": "https://models.github.ai/inference/chat/completions",
+  "modelo": "openai/gpt-4.1-mini",
+  "parametros": {
+    "temperature": 0,
+    "top_p": 1,
+    "seed": 42,
+    "max_tokens": 2000
+  },
+  "entradas": ["src/booking-domain.js", "src/app.js"],
+  "prompt": "ai-gate/prompt-revisao.md",
+  "limiares": {
+    "bloquear_severidades": ["critica", "alta"],
+    "confianca_minima": 0.7,
+    "max_problemas_media": 5
+  },
+  "reprodutibilidade": {
+    "execucoes": 2,
+    "regra": "bloqueia só se todas as execuções bloquearem; decisões diferentes geram aviso para revisão humana"
+  },
+  "testes": {
+    "prompt": "ai-gate/prompt-testes.md",
+    "entradas": ["src/booking-domain.js", "tests/booking-domain.test.js"]
+  }
+}
