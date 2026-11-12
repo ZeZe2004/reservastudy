@@ -1,0 +1,12 @@
+# Limiares do ZAP baseline: regra, ação (IGNORE, WARN ou FAIL), descrição
+# As regras que não estão aqui ficam como WARN.
+2	FAIL	(Private IP Disclosure)
+10003	FAIL	(Vulnerable JS Library)
+10010	FAIL	(Cookie No HttpOnly Flag)
+10011	FAIL	(Cookie Without Secure Flag)
+10017	FAIL	(Cross-Domain JavaScript Source File Inclusion)
+10023	FAIL	(Information Disclosure - Debug Error Messages)
+10024	FAIL	(Information Disclosure - Sensitive Information in URL)
+10040	FAIL	(Secure Pages Include Mixed Content)
+10062	FAIL	(PII Disclosure)
+90022	FAIL	(Application Error Disclosure)
