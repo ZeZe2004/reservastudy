@@ -1,5 +1,5 @@
 {
-  "versao": "1.1.0",
+  "versao": "1.2.0",
   "ferramenta": "Google Gemini API (endpoint compatível com OpenAI)",
   "endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
   "modelo": "gemini-3.8-flash",
@@ -33,5 +33,19 @@
     ]
   },
   "chave": "variável AI_API_KEY, vinda do secret GEMINI_API_KEY do repositório",
-  "nota_seed": "A API do Gemini não documenta o parâmetro seed nas chat completions; a estabilidade depende de temperature 0 e é medida com 2 execuções."
+  "nota_seed": "A API do Gemini não documenta o parâmetro seed nas chat completions; a estabilidade depende de temperature 0 e é medida com 2 execuções.",
+  "modelo_alternativo": "gemini-3.5-flash-lite",
+  "tentativas": {
+    "maximo": 4,
+    "espera_segundos": [
+      10,
+      30,
+      60
+    ],
+    "repetir_em": [
+      429,
+      500,
+      503
+    ]
+  }
 }

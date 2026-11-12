@@ -31,9 +31,9 @@ async function main() {
   const execucoes = [];
 
   for (let i = 1; i <= config.reprodutibilidade.execucoes; i += 1) {
-    const { json, modeloUsado, fingerprint } = await perguntar(prompt);
+    const { json, modeloUsado, alternativo, tentativas, fingerprint } = await perguntar(prompt);
     const resultado = validar(json);
-    execucoes.push({ execucao: i, modeloUsado, fingerprint, ...decidir(resultado), resultado });
+    execucoes.push({ execucao: i, modeloUsado, alternativo, tentativas, fingerprint, ...decidir(resultado), resultado });
   }
 
   const decisoes = execucoes.map((e) => e.decisao);
@@ -43,13 +43,14 @@ async function main() {
   const todos = new Set(ids.flatMap((s) => [...s]));
   const concordancia = todos.size === 0 ? 1 : comuns.length / todos.size;
   const final = decisoes.every((d) => d === "REPROVADO") ? "REPROVADO" : "APROVADO";
+  const modelos = [...new Set(execucoes.map((e) => e.modeloUsado))];
 
   const relatorio = {
     data: new Date().toISOString(),
     commit: process.env.GITHUB_SHA || "local",
     configuracao: { versao: config.versao, modelo: config.modelo, parametros: config.parametros, limiares: config.limiares },
     execucoes,
-    reprodutibilidade: { decisoes, estavel, concordancia_problemas: Number(concordancia.toFixed(2)) },
+    reprodutibilidade: { decisoes, estavel, concordancia_problemas: Number(concordancia.toFixed(2)), modelos },
     decisao_final: final
   };
 
@@ -62,6 +63,7 @@ async function main() {
     "### Gate de IA",
     `Modelo ${config.modelo} (config ${config.versao}, temperature ${config.parametros.temperature})`,
     "",
+    `Modelos que responderam: ${modelos.join(", ")}`,
     `Decisões: ${decisoes.join(" / ")} · estável: ${estavel ? "sim" : "não"} · concordância dos problemas: ${Math.round(concordancia * 100)}%`,
     `**Decisão final: ${final}**`,
     estavel ? "" : "> As execuções discordaram: o gate não bloqueia e o resultado precisa de revisão humana.",

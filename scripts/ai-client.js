@@ -15,32 +15,55 @@ function montarPrompt(ficheiroPrompt, entradas) {
   return template.replace("{{CODIGO}}", codigo);
 }
 
+const esperar = (segundos) => new Promise((resolve) => setTimeout(resolve, segundos * 1000));
+
+async function pedido(modelo, prompt, token) {
+  const resposta = await fetch(config.endpoint, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: modelo,
+      messages: [{ role: "user", content: prompt }],
+      ...config.parametros
+    })
+  });
+  return { estado: resposta.status, tipo: resposta.headers.get("content-type") || "?", corpo: await resposta.text() };
+}
+
+// Tenta o modelo principal com esperas crescentes; se continuar indisponível,
+// tenta o modelo alternativo. O modelo que respondeu fica registado no relatório.
 async function perguntar(prompt) {
   const token = process.env.AI_API_KEY;
   if (!token) {
     throw new Error("Falta AI_API_KEY: criar o secret GEMINI_API_KEY no repositório (ver docs/sprint-3.md)");
   }
-  const resposta = await fetch(config.endpoint, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: config.modelo,
-      messages: [{ role: "user", content: prompt }],
-      ...config.parametros
-    })
-  });
-  const corpo = await resposta.text();
-  const tipo = resposta.headers.get("content-type") || "?";
-  if (!resposta.ok || !tipo.includes("json")) {
-    throw new Error(`A API de IA respondeu ${resposta.status} (${tipo}): ${corpo.slice(0, 300)}`);
+  const { maximo, espera_segundos: esperas, repetir_em: repetir } = config.tentativas;
+  const modelos = [config.modelo, config.modelo_alternativo].filter(Boolean);
+  let ultimoErro = "";
+
+  for (const modelo of modelos) {
+    for (let tentativa = 1; tentativa <= maximo; tentativa += 1) {
+      const { estado, tipo, corpo } = await pedido(modelo, prompt, token);
+      if (estado === 200 && tipo.includes("json")) {
+        const dados = JSON.parse(corpo);
+        return {
+          json: extrairJson(dados.choices[0].message.content),
+          modeloUsado: dados.model || modelo,
+          alternativo: modelo !== config.modelo,
+          tentativas: tentativa,
+          fingerprint: dados.system_fingerprint || null
+        };
+      }
+      ultimoErro = `${modelo} respondeu ${estado} (${tipo}): ${corpo.slice(0, 300)}`;
+      if (!repetir.includes(estado) || tentativa === maximo) {
+        break;
+      }
+      const espera = esperas[Math.min(tentativa - 1, esperas.length - 1)];
+      console.log(`${modelo} indisponível (${estado}); nova tentativa daqui a ${espera}s`);
+      await esperar(espera);
+    }
   }
-  const dados = JSON.parse(corpo);
-  const conteudo = dados.choices[0].message.content;
-  return {
-    json: extrairJson(conteudo),
-    modeloUsado: dados.model,
-    fingerprint: dados.system_fingerprint || null
-  };
+  throw new Error(`A API de IA não respondeu: ${ultimoErro}`);
 }
 
 // O modelo às vezes embrulha o JSON em texto ou em ```json; fica só com o objeto.
