@@ -1,0 +1,36 @@
+name: Rollback
+
+# Volta a publicar uma versão anterior do site (commit ou tag).
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit ou tag a publicar
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  rollback:
+    name: Publicar versão anterior
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Preparar site
+        run: |
+          mkdir -p dist
+          cp -r index.html src dist/
+          echo "{\"commit\": \"$(git rev-parse HEAD)\", \"rollback\": true}" > dist/version.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+      - id: deployment
+        uses: actions/deploy-pages@v4
