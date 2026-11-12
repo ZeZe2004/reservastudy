@@ -5,11 +5,10 @@ on:
 
 permissions:
   contents: read
-  models: read
 
 jobs:
   sugerir:
-    name: Sugestões de testes (GitHub Models)
+    name: Sugestões de testes (Gemini)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +17,7 @@ jobs:
           node-version: 22
       - run: node scripts/ai-sugerir-testes.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
           name: testes-sugeridos

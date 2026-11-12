@@ -1,4 +1,5 @@
-// Cliente mínimo do GitHub Models, partilhado pelo gate de IA e pelas sugestões de testes.
+// Cliente mínimo para a API de chat (formato OpenAI) configurada em ai-gate/config.json,
+// partilhado pelo gate de IA e pelas sugestões de testes.
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -15,9 +16,9 @@ function montarPrompt(ficheiroPrompt, entradas) {
 }
 
 async function perguntar(prompt) {
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.AI_API_KEY;
   if (!token) {
-    throw new Error("Falta GITHUB_TOKEN (o job precisa de permissions: models: read)");
+    throw new Error("Falta AI_API_KEY: criar o secret GEMINI_API_KEY no repositório (ver docs/sprint-3.md)");
   }
   const resposta = await fetch(config.endpoint, {
     method: "POST",
@@ -25,14 +26,13 @@ async function perguntar(prompt) {
     body: JSON.stringify({
       model: config.modelo,
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
       ...config.parametros
     })
   });
   const corpo = await resposta.text();
   const tipo = resposta.headers.get("content-type") || "?";
   if (!resposta.ok || !tipo.includes("json")) {
-    throw new Error(`GitHub Models respondeu ${resposta.status} (${tipo}): ${corpo.slice(0, 300)}`);
+    throw new Error(`A API de IA respondeu ${resposta.status} (${tipo}): ${corpo.slice(0, 300)}`);
   }
   const dados = JSON.parse(corpo);
   const conteudo = dados.choices[0].message.content;

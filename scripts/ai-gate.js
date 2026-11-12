@@ -60,7 +60,7 @@ async function main() {
     `| ${e.execucao} | ${p.severidade} | ${p.confianca} | ${p.ficheiro}:${p.linha} | ${p.descricao.replace(/\|/g, "/")} |`));
   const resumo = [
     "### Gate de IA",
-    `Modelo ${config.modelo} (config ${config.versao}, temperature ${config.parametros.temperature}, seed ${config.parametros.seed})`,
+    `Modelo ${config.modelo} (config ${config.versao}, temperature ${config.parametros.temperature})`,
     "",
     `Decisões: ${decisoes.join(" / ")} · estável: ${estavel ? "sim" : "não"} · concordância dos problemas: ${Math.round(concordancia * 100)}%`,
     `**Decisão final: ${final}**`,

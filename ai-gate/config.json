@@ -1,18 +1,23 @@
 {
-  "versao": "1.0.0",
-  "ferramenta": "GitHub Models",
-  "endpoint": "https://models.github.ai/inference/chat/completions",
-  "modelo": "openai/gpt-4.1-mini",
+  "versao": "1.1.0",
+  "ferramenta": "Google Gemini API (endpoint compatível com OpenAI)",
+  "endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+  "modelo": "gemini-3.8-flash",
   "parametros": {
     "temperature": 0,
     "top_p": 1,
-    "seed": 42,
-    "max_tokens": 2000
+    "max_tokens": 4000
   },
-  "entradas": ["src/booking-domain.js", "src/app.js"],
+  "entradas": [
+    "src/booking-domain.js",
+    "src/app.js"
+  ],
   "prompt": "ai-gate/prompt-revisao.md",
   "limiares": {
-    "bloquear_severidades": ["critica", "alta"],
+    "bloquear_severidades": [
+      "critica",
+      "alta"
+    ],
     "confianca_minima": 0.7,
     "max_problemas_media": 5
   },
@@ -22,6 +27,11 @@
   },
   "testes": {
     "prompt": "ai-gate/prompt-testes.md",
-    "entradas": ["src/booking-domain.js", "tests/booking-domain.test.js"]
-  }
+    "entradas": [
+      "src/booking-domain.js",
+      "tests/booking-domain.test.js"
+    ]
+  },
+  "chave": "variável AI_API_KEY, vinda do secret GEMINI_API_KEY do repositório",
+  "nota_seed": "A API do Gemini não documenta o parâmetro seed nas chat completions; a estabilidade depende de temperature 0 e é medida com 2 execuções."
 }

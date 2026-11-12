@@ -58,9 +58,6 @@ jobs:
     name: Gate de IA (revisão de código)
     runs-on: ubuntu-latest
     needs: [lint, test]
-    permissions:
-      contents: read
-      models: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -70,7 +67,7 @@ jobs:
       - name: Revisão por IA (2 execuções idênticas)
         run: node scripts/ai-gate.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
