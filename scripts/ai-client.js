@@ -1,0 +1,43 @@
+// Cliente mínimo do GitHub Models, partilhado pelo gate de IA e pelas sugestões de testes.
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = path.join(__dirname, "..");
+const config = JSON.parse(fs.readFileSync(path.join(root, "ai-gate/config.json"), "utf8"));
+
+function montarPrompt(ficheiroPrompt, entradas) {
+  const template = fs.readFileSync(path.join(root, ficheiroPrompt), "utf8");
+  const codigo = entradas
+    .map((f) => `// ===== ${f} =====\n` + fs.readFileSync(path.join(root, f), "utf8")
+      .split("\n").map((l, i) => `${String(i + 1).padStart(4)} | ${l}`).join("\n"))
+    .join("\n\n");
+  return template.replace("{{CODIGO}}", codigo);
+}
+
+async function perguntar(prompt) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    throw new Error("Falta GITHUB_TOKEN (o job precisa de permissions: models: read)");
+  }
+  const resposta = await fetch(config.endpoint, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: config.modelo,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      ...config.parametros
+    })
+  });
+  if (!resposta.ok) {
+    throw new Error(`GitHub Models respondeu ${resposta.status}: ${await resposta.text()}`);
+  }
+  const dados = await resposta.json();
+  return {
+    json: JSON.parse(dados.choices[0].message.content),
+    modeloUsado: dados.model,
+    fingerprint: dados.system_fingerprint || null
+  };
+}
+
+module.exports = { config, montarPrompt, perguntar, root };
