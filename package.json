@@ -1,12 +1,21 @@
 {
-  "name": "reservastudy-sprint-1",
-  "version": "1.0.0",
+  "name": "reservastudy",
+  "version": "1.1.0",
   "private": true,
-  "description": "Protótipo académico de reservas de salas de estudo — Sprint 1",
+  "description": "Protótipo académico de reservas de salas de estudo",
   "scripts": {
-    "test": "node --test tests/booking-domain.test.js"
+    "lint": "eslint . --max-warnings 0",
+    "test": "node --test tests/*.test.js",
+    "test:ci": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=70 --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reports/testes.xml tests/*.test.js",
+    "build": "node scripts/build.js",
+    "audit": "npm audit --audit-level=high"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0"
   }
 }
