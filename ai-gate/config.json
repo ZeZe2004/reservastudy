@@ -1,5 +1,5 @@
 {
-  "versao": "1.2.1",
+  "versao": "1.3.0",
   "ferramenta": "Google Gemini API (endpoint compatível com OpenAI)",
   "endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
   "modelo": "gemini-3.8-flash",
@@ -23,7 +23,8 @@
   },
   "reprodutibilidade": {
     "execucoes": 2,
-    "regra": "bloqueia só se todas as execuções bloquearem; decisões diferentes geram aviso para revisão humana"
+    "concordancia_minima": 0.8,
+    "regra": "Decisões divergentes, modelos diferentes ou concordância insuficiente exigem revisão humana e bloqueiam deploy automático"
   },
   "testes": {
     "prompt": "ai-gate/prompt-testes.md",
