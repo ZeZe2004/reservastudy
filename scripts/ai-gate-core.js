@@ -51,31 +51,52 @@ function assinatura(problema) {
   return `${problema.id}|${problema.ficheiro}|${problema.linha}|${problema.severidade}`;
 }
 
-function compararExecucoes(execucoes, confiancaMinima) {
+function concordanciaConjuntos(conjuntos) {
+  const uniao = new Set(conjuntos.flatMap((conjunto) => [...conjunto]));
+  if (uniao.size === 0) return 1;
+  const intersecao = [...conjuntos[0]].filter((item) => conjuntos.every((conjunto) => conjunto.has(item)));
+  return intersecao.length / uniao.size;
+}
+
+function compararExecucoes(execucoes, confiancaMinima, limiares) {
   if (!Array.isArray(execucoes) || execucoes.length < 2) {
     throw new Error("São necessárias pelo menos duas execuções para medir reprodutibilidade");
   }
   if (typeof confiancaMinima !== "number" || confiancaMinima < 0 || confiancaMinima > 1) {
     throw new Error("Limiar de concordância inválido");
   }
+  if (!limiares || !Array.isArray(limiares.bloquear_severidades)
+      || typeof limiares.confianca_minima !== "number") {
+    throw new Error("Limiares de segurança obrigatórios");
+  }
   const decisoes = execucoes.map((e) => e.decisao);
   const modelos = [...new Set(execucoes.map((e) => e.modeloUsado))];
   const estavel = decisoes.every((d) => d === decisoes[0]);
-  const conjuntos = execucoes.map((e) => new Set(e.resultado.problemas.map(assinatura)));
-  const uniao = new Set(conjuntos.flatMap((conjunto) => [...conjunto]));
-  const intersecao = [...conjuntos[0]].filter((item) => conjuntos.every((conjunto) => conjunto.has(item)));
-  const concordancia = uniao.size ? intersecao.length / uniao.size : 1;
   const mesmoModelo = modelos.length === 1;
-  const requerRevisao = !estavel || !mesmoModelo || concordancia < confiancaMinima;
-  const decisaoFinal = requerRevisao ? "REVISAO_HUMANA" : decisoes[0];
+  const todosConjuntos = execucoes.map((e) => new Set(e.resultado.problemas.map(assinatura)));
+  const bloqueantesConjuntos = execucoes.map((e) => new Set(
+    e.resultado.problemas
+      .filter((p) => limiares.bloquear_severidades.includes(p.severidade)
+        && p.confianca >= limiares.confianca_minima)
+      .map(assinatura)
+  ));
+  const concordanciaTodos = concordanciaConjuntos(todosConjuntos);
+  const concordanciaBloqueantes = concordanciaConjuntos(bloqueantesConjuntos);
+
+  // Alertas não bloqueantes podem variar na redação e no ID entre execuções.
+  // A discordância é reportada e revista, mas só o risco material impede aprovação.
+  // Divergência de decisões, de modelos ou de alertas bloqueantes exige revisão humana.
+  const requerRevisao = !estavel || !mesmoModelo || concordanciaBloqueantes < confiancaMinima;
   return {
     decisoes,
     estavel,
-    concordancia_problemas: Number(concordancia.toFixed(4)),
+    concordancia_problemas: Number(concordanciaTodos.toFixed(4)),
+    concordancia_bloqueantes: Number(concordanciaBloqueantes.toFixed(4)),
+    avisos_nao_bloqueantes_divergentes: concordanciaTodos < confiancaMinima,
     modelos,
     mesmo_modelo: mesmoModelo,
     requer_revisao_humana: requerRevisao,
-    decisao_final: decisaoFinal
+    decisao_final: requerRevisao ? "REVISAO_HUMANA" : decisoes[0]
   };
 }
 
