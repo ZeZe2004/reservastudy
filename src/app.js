@@ -132,7 +132,14 @@
     if (visible.length === 0) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.innerHTML = '<span aria-hidden="true">✦</span><strong>Dia livre, mente tranquila.</strong><span>Ainda não há reservas nesta data.</span>';
+      const icon = document.createElement("span");
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "✦";
+      const title = document.createElement("strong");
+      title.textContent = "Dia livre, mente tranquila.";
+      const description = document.createElement("span");
+      description.textContent = "Ainda não há reservas nesta data.";
+      empty.append(icon, title, description);
       reservationList.append(empty);
       return;
     }
