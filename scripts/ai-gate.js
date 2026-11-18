@@ -28,7 +28,7 @@ async function main() {
     execucoes.push({ execucao: i, modeloUsado, alternativo, tentativas, fingerprint, ...decidir(resultado, config.limiares), resultado });
   }
 
-  const analise = compararExecucoes(execucoes, config.reprodutibilidade.concordancia_minima);
+  const analise = compararExecucoes(execucoes, config.reprodutibilidade.concordancia_minima, config.limiares);
   const ficheiros = [...new Set(["ai-gate/config.json", config.prompt, ...config.entradas])];
   const hashes = Object.fromEntries(ficheiros.map((ficheiro) => [ficheiro, hashFicheiro(ficheiro)]));
   const relatorio = {
@@ -50,10 +50,11 @@ async function main() {
     `Modelo ${config.modelo} (config ${config.versao}, temperature ${config.parametros.temperature})`,
     "",
     `Modelos que responderam: ${analise.modelos.join(", ")}`,
-    `Decisões: ${analise.decisoes.join(" / ")} · estável: ${analise.estavel ? "sim" : "não"} · concordância dos problemas: ${(analise.concordancia_problemas * 100).toFixed(1)}%`,
+    `Decisões: ${analise.decisoes.join(" / ")} · estável: ${analise.estavel ? "sim" : "não"} · concordância dos alertas bloqueantes: ${(analise.concordancia_bloqueantes * 100).toFixed(1)}% · concordância de todos os alertas: ${(analise.concordancia_problemas * 100).toFixed(1)}%`,
     `**Decisão final: ${analise.decisao_final}**`,
-    analise.requer_revisao_humana ? "> As execuções discordaram (ou modelos diferentes/alertas abaixo do limiar de concordância). O gate bloqueia o deploy até revisão humana." : "",
+    analise.requer_revisao_humana ? "> Houve divergência de decisões, modelo ou alertas bloqueantes. O gate bloqueia o deploy até revisão humana." : "",
     "",
+    analise.avisos_nao_bloqueantes_divergentes ? "> Avisos não bloqueantes variaram entre execuções. Rever os alertas no relatório; a decisão de segurança manteve-se estável." : "",
     "| Execução | Severidade | Confiança | Local | Problema |",
     "|---|---|---|---|---|",
     ...linhas
