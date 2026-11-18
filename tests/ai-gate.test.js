@@ -24,16 +24,32 @@ test("bloqueia mais de cinco problemas médios", () => {
   assert.equal(decidir(resultado(problemas),limiares).decisao,"REPROVADO");
 });
 test("duas aprovações estáveis aprovam", () => {
-  const a=compararExecucoes([execucao("APROVADO"),execucao("APROVADO")],0.8);
+  const a=compararExecucoes([execucao("APROVADO"),execucao("APROVADO")],0.8,limiares);
   assert.equal(a.decisao_final,"APROVADO");
   assert.equal(a.concordancia_problemas,1);
 });
 test("duas reprovações iguais reprovam", () => assert.equal(
-  compararExecucoes([execucao("REPROVADO",[alerta()]),execucao("REPROVADO",[alerta()])],0.8).decisao_final,"REPROVADO"));
+  compararExecucoes([execucao("REPROVADO",[alerta()]),execucao("REPROVADO",[alerta()])],0.8,limiares).decisao_final,"REPROVADO"));
 test("decisões divergentes exigem revisão humana", () => assert.equal(
-  compararExecucoes([execucao("REPROVADO"),execucao("APROVADO")],0.8).decisao_final,"REVISAO_HUMANA"));
-test("alertas divergentes exigem revisão mesmo com decisões iguais", () => assert.equal(
-  compararExecucoes([execucao("APROVADO",[alerta()]),execucao("APROVADO",[])],0.8).decisao_final,"REVISAO_HUMANA"));
+  compararExecucoes([execucao("REPROVADO"),execucao("APROVADO")],0.8,limiares).decisao_final,"REVISAO_HUMANA"));
+test("alertas bloqueantes divergentes exigem revisão mesmo com decisões iguais", () => assert.equal(
+  compararExecucoes([execucao("APROVADO",[alerta()]),execucao("APROVADO",[])],0.8,limiares).decisao_final,"REVISAO_HUMANA"));
 test("fallback para outro modelo exige revisão", () => assert.equal(
-  compararExecucoes([execucao("APROVADO"),execucao("APROVADO",[],"modelo-alternativo")],0.8).decisao_final,"REVISAO_HUMANA"));
-test("rejeita uma única execução", () => assert.throws(() => compararExecucoes([execucao("APROVADO")],0.8)));
+  compararExecucoes([execucao("APROVADO"),execucao("APROVADO",[],"modelo-alternativo")],0.8,limiares).decisao_final,"REVISAO_HUMANA"));
+test("rejeita uma única execução", () => assert.throws(() => compararExecucoes([execucao("APROVADO")],0.8,limiares)));
+test("avisos médios não bloqueantes variam sem bloquear aprovação", () => {
+  const a = compararExecucoes([
+    execucao("APROVADO",[alerta({severidade:"media"})]),
+    execucao("APROVADO",[])
+  ],0.8,limiares);
+  assert.equal(a.decisao_final,"APROVADO");
+  assert.equal(a.avisos_nao_bloqueantes_divergentes,true);
+  assert.equal(a.concordancia_bloqueantes,1);
+});
+test("alertas graves coincidentes reprovam", () => {
+  const a = compararExecucoes([
+    execucao("REPROVADO",[alerta()]),
+    execucao("REPROVADO",[alerta()])
+  ],0.8,limiares);
+  assert.equal(a.decisao_final,"REPROVADO");
+});
