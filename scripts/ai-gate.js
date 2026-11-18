@@ -2,72 +2,59 @@
 // Corre a mesma revisão N vezes com configuração idêntica e compara as decisões.
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { config, montarPrompt, perguntar, root } = require("./ai-client.js");
 
-const SEVERIDADES = ["critica", "alta", "media", "baixa"];
+const { validar, decidir, compararExecucoes } = require("./ai-gate-core.js");
 
-function validar(resultado) {
-  if (!resultado || !Array.isArray(resultado.problemas)) {
-    throw new Error("Resposta sem a lista 'problemas'");
-  }
-  for (const p of resultado.problemas) {
-    if (!SEVERIDADES.includes(p.severidade) || typeof p.confianca !== "number") {
-      throw new Error(`Problema com formato inválido: ${JSON.stringify(p)}`);
-    }
-  }
-  return resultado;
+function hashFicheiro(nome) {
+  return crypto.createHash("sha256").update(fs.readFileSync(path.join(root, nome))).digest("hex");
 }
 
-function decidir(resultado) {
-  const { bloquear_severidades: graves, confianca_minima: minima, max_problemas_media: maxMedia } = config.limiares;
-  const bloqueantes = resultado.problemas.filter((p) => graves.includes(p.severidade) && p.confianca >= minima);
-  const medios = resultado.problemas.filter((p) => p.severidade === "media" && p.confianca >= minima);
-  const bloqueia = bloqueantes.length > 0 || medios.length > maxMedia;
-  return { decisao: bloqueia ? "REPROVADO" : "APROVADO", bloqueantes: bloqueantes.map((p) => p.id), medios: medios.length };
+function seguro(texto) {
+  return String(texto).replace(/\|/g, "/").replace(/[\r\n]+/g, " ").slice(0, 400);
 }
 
 async function main() {
+  if (!Number.isInteger(config.reprodutibilidade.execucoes) || config.reprodutibilidade.execucoes < 2) {
+    throw new Error("Configuração inválida: definir pelo menos 2 execuções");
+  }
   const prompt = montarPrompt(config.prompt, config.entradas);
   const execucoes = [];
 
   for (let i = 1; i <= config.reprodutibilidade.execucoes; i += 1) {
     const { json, modeloUsado, alternativo, tentativas, fingerprint } = await perguntar(prompt);
-    const resultado = validar(json);
-    execucoes.push({ execucao: i, modeloUsado, alternativo, tentativas, fingerprint, ...decidir(resultado), resultado });
+    const resultado = validar(json, config.entradas);
+    execucoes.push({ execucao: i, modeloUsado, alternativo, tentativas, fingerprint, ...decidir(resultado, config.limiares), resultado });
   }
 
-  const decisoes = execucoes.map((e) => e.decisao);
-  const estavel = decisoes.every((d) => d === decisoes[0]);
-  const ids = execucoes.map((e) => new Set(e.resultado.problemas.map((p) => `${p.ficheiro}:${p.severidade}`)));
-  const comuns = [...ids[0]].filter((x) => ids.every((s) => s.has(x)));
-  const todos = new Set(ids.flatMap((s) => [...s]));
-  const concordancia = todos.size === 0 ? 1 : comuns.length / todos.size;
-  const final = decisoes.every((d) => d === "REPROVADO") ? "REPROVADO" : "APROVADO";
-  const modelos = [...new Set(execucoes.map((e) => e.modeloUsado))];
-
+  const analise = compararExecucoes(execucoes, config.reprodutibilidade.concordancia_minima, config.limiares);
+  const ficheiros = [...new Set(["ai-gate/config.json", config.prompt, ...config.entradas])];
+  const hashes = Object.fromEntries(ficheiros.map((ficheiro) => [ficheiro, hashFicheiro(ficheiro)]));
   const relatorio = {
     data: new Date().toISOString(),
     commit: process.env.GITHUB_SHA || "local",
-    configuracao: { versao: config.versao, modelo: config.modelo, parametros: config.parametros, limiares: config.limiares },
+    configuracao: { versao: config.versao, ferramenta: config.ferramenta, modelo: config.modelo, parametros: config.parametros, limiares: config.limiares, reprodutibilidade: config.reprodutibilidade, hashes_sha256: hashes },
     execucoes,
-    reprodutibilidade: { decisoes, estavel, concordancia_problemas: Number(concordancia.toFixed(2)), modelos },
-    decisao_final: final
+    reprodutibilidade: analise,
+    decisao_final: analise.decisao_final
   };
 
   fs.mkdirSync(path.join(root, "reports"), { recursive: true });
   fs.writeFileSync(path.join(root, "reports/ai-gate.json"), JSON.stringify(relatorio, null, 2));
 
   const linhas = execucoes.flatMap((e) => e.resultado.problemas.map((p) =>
-    `| ${e.execucao} | ${p.severidade} | ${p.confianca} | ${p.ficheiro}:${p.linha} | ${p.descricao.replace(/\|/g, "/")} |`));
+    `| ${e.execucao} | ${p.severidade} | ${p.confianca} | ${seguro(`${p.ficheiro}:${p.linha}`)} | ${seguro(p.descricao)} |`));
   const resumo = [
     "### Gate de IA",
     `Modelo ${config.modelo} (config ${config.versao}, temperature ${config.parametros.temperature})`,
     "",
-    `Modelos que responderam: ${modelos.join(", ")}`,
-    `Decisões: ${decisoes.join(" / ")} · estável: ${estavel ? "sim" : "não"} · concordância dos problemas: ${Math.round(concordancia * 100)}%`,
-    `**Decisão final: ${final}**`,
-    estavel ? "" : "> As execuções discordaram: o gate não bloqueia e o resultado precisa de revisão humana.",
+    `Modelos que responderam: ${analise.modelos.join(", ")}`,
+    `Decisões: ${analise.decisoes.join(" / ")} · estável: ${analise.estavel ? "sim" : "não"} · concordância dos alertas bloqueantes: ${(analise.concordancia_bloqueantes * 100).toFixed(1)}% · concordância de todos os alertas: ${(analise.concordancia_problemas * 100).toFixed(1)}%`,
+    `**Decisão final: ${analise.decisao_final}**`,
+    analise.requer_revisao_humana ? "> Houve divergência de decisões, modelo ou alertas bloqueantes. O gate bloqueia o deploy até revisão humana." : "",
     "",
+    analise.avisos_nao_bloqueantes_divergentes ? "> Avisos não bloqueantes variaram entre execuções. Rever os alertas no relatório; a decisão de segurança manteve-se estável." : "",
     "| Execução | Severidade | Confiança | Local | Problema |",
     "|---|---|---|---|---|",
     ...linhas
@@ -76,10 +63,10 @@ async function main() {
   if (process.env.GITHUB_STEP_SUMMARY) {
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, resumo + "\n");
   }
-  if (!estavel) {
-    console.log("::warning::Gate de IA instável: as execuções deram decisões diferentes. Rever manualmente.");
+  if (analise.requer_revisao_humana) {
+    console.log("::warning::Gate de IA exige revisão humana: deploy suspenso.");
   }
-  process.exit(final === "REPROVADO" ? 1 : 0);
+  process.exitCode = analise.decisao_final === "APROVADO" ? 0 : 1;
 }
 
 main().catch((erro) => {

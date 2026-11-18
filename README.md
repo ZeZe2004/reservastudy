@@ -13,10 +13,10 @@ Equipa: José Baptista e Rafael Vicente.
 
 ## Pipeline
 
-Cada push corre lint, testes com cobertura, SAST (Semgrep e npm audit), build, DAST (OWASP ZAP) e, na `main`, o deploy para o GitHub Pages. Detalhes, limiares e rollback em [docs/sprint-2.md](docs/sprint-2.md).
+Cada push corre lint, testes com cobertura, SAST (Semgrep e npm audit), build, DAST (OWASP ZAP) e, na `main`, o deploy para o GitHub Pages. Detalhes, limiares e rollback em [docs/sprint-2.md](docs/sprint-2.md). O Sprint 3 acrescenta um gate de IA para revisão, com comparação de duas execuções, revisão humana em divergências e relatórios auditáveis; ver [docs/sprint-3.md](docs/sprint-3.md).
 
 ## Documentação
 
-- [Sprint 1](docs/sprint-1.md) · [Sprint 2](docs/sprint-2.md)
+- [Sprint 1](docs/sprint-1.md) · [Sprint 2](docs/sprint-2.md) · [Sprint 3](docs/sprint-3.md)
 - [Contrato de equipa](docs/contrato-equipa.md)
 - [Backlog do Sprint 1](docs/sprint-1-backlog.csv)
